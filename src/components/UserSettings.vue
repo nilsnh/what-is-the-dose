@@ -1,16 +1,15 @@
 <template>
 <div>
   <h2>Brukerinfo</h2>
-  <form @submit.prevent="handleSubmit">
+    <p>Verdiene lagres automatisk når du skriver inn.</p>
     <p><label>
       IK:
-      <input type="number" v-model.number="IKValue">
+      <input type="number" step="0.1" @change="changeListener" v-model="IKValue">
     </label></p>
     <p><label>
       IF:
-      <input type="number" v-model.number="IFValue">
+      <input type="number" step="0.1" @change="changeListener" v-model="IFValue">
     </label></p>
-    <button type="submit">Lagre</button>
   </form>
 </div>
 </template>
@@ -23,8 +22,9 @@
       return { IKValue, IFValue }
     },
     methods: {
-      handleSubmit: function () {
+      changeListener: function () {
         const { IKValue, IFValue } = this
+        console.log('Handle submit was called');
         this.$store.commit('updateIKAndIFValues', { IKValue, IFValue })
       }
     }

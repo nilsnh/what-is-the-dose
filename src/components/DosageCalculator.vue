@@ -5,16 +5,20 @@
     Du må først fylle ut IK og IF verdier før du kan kalkulere dosen.
   </p>
   <p><label>
-    Blodsukker:
-    <input type="number" v-model.number="bloodsugar" :disabled="disableInputFields">
+    Målt blodsukker:
+    <input type="number" step="0.1" v-model.number="measuredBloodsugar" :disabled="disableInputFields">
   </label></p>
   <p><label>
-      Karbohydrater:
-      <input type="number" v-model.number="carbohydrates" :disabled="disableInputFields">
+    Karbohydrater:
+    <input type="number" v-model.number="plannedCarbohydratesIntake" :disabled="disableInputFields">
   </label></p>
-  <p>
-    Din anbefalte dose: {{ recommendedDose }}
-  </p>
+  <p>Blodsukkermål: {{ bloodsugarGoal }}</p>
+  <p><label>
+      Treningsmodus:
+      <input type="checkbox" v-model="isTrainingMode">
+  </label></p>
+  <p><strong>Din anbefalte dose: <span v-if="shouldShowCalculation">{{ roundToNearestHalf(recommendedDose) }}</span></strong></p>
+  <p v-if="shouldShowCalculation">Bakgrunnstall: {{ recommendedDose }}</p>
 </div>
 </template>
 
@@ -23,17 +27,42 @@
     name: 'DosageCalculator',
     data() {
       return {
-        bloodsugar: null,
-        carbohydrates: null
+        measuredBloodsugar: null,
+        plannedCarbohydratesIntake: null,
+        isTrainingMode: false
       }
     },
     computed: {
       recommendedDose: function () {
-        const result = this.bloodsugar + this.carbohydrates
+        const { IKValue, IFValue } = this.$store.state
+        const {measuredBloodsugar, plannedCarbohydratesIntake, bloodsugarGoal} = this
+        const result = plannedCarbohydratesIntake / IKValue + (measuredBloodsugar - bloodsugarGoal) / IFValue
         return result ? result : 0
+      },
+      bloodsugarGoal: function () {
+        const defaultBloodSugarGoal = 5
+        const trainingBloodsugarGoal = 8
+        return this.isTrainingMode ? trainingBloodsugarGoal : defaultBloodSugarGoal
       },
       disableInputFields: function () {
         return !(this.$store.state.IKValue && this.$store.state.IFValue)
+      },
+      shouldShowCalculation: function () {
+        return this.measuredBloodsugar !== null || this.plannedCarbohydratesIntake !== null
+      }
+    },
+    methods: {
+      roundToNearestHalf: function (num) {
+        const decimals = num % 1
+        let adjustment = 0.0
+        if (decimals >= 0.3 && decimals <= 0.7) {
+            adjustment = 0.5
+        } else if (decimals > 0.7) {
+            adjustment = 1.0
+        } else if (decimals < 0.3) {
+            adjustment = 0.0
+        }
+        return (num - decimals) + adjustment
       }
     }
   }

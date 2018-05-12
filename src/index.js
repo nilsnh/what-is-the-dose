@@ -7,9 +7,8 @@ Vue.config.productionTip = false
 
 const store = new Vuex.Store({
   state: {
-    count: 0,
-    IKValue: parseInt(window.localStorage.getItem("IKValue"), 10),
-    IFValue: parseInt(window.localStorage.getItem("IFValue"), 10)
+    IKValue: parseFloat(window.localStorage.getItem("IKValue")) || 0,
+    IFValue: parseFloat(window.localStorage.getItem("IFValue")) || 0,
   },
   mutations: {
     updateIKAndIFValues(state, { IKValue, IFValue }) {
